@@ -52,7 +52,7 @@ var clickHandler = function(e){
 
 var popstateHandler = function(e){
 	var state = e.state;
-	var path = state.url;
+	var path = state.url;  //
 
 	var currentPath = this.url;
 
@@ -61,7 +61,7 @@ var popstateHandler = function(e){
 }
 
 var hashchangeHandler = function(e){
-	var currentPath = e.oldURL;
+	var currentPath = e.oldURL; //
 	var path = e.newURL;
 
 
