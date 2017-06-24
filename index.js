@@ -1,24 +1,72 @@
 // var pathToRegexp = require('path-to-regexp');
-
-
 var isHistoryStateSupport = 'onpopstate' in window;
 var location  = window.location;
 var sessionStorage = window.sessionStorage;
 var clickEvent = document.ontouchstart ? 'touchstart' : 'click';
-var uid = 0;
 
 
+function sameOrigin(href){
+	var origin = location.protocol+'://'+location.hostname+':'+location.port;
+	return (href && href.indexOf(origin)===0)
+}
 
-var onclickHandler = function(e){
+
+var clickHandler = function(e){
+	var target = e.target;
+
+	//not a
+	var parentNode = target;
+	while(parentNode!==document){
+		if(parentNode.tagName === 'A'){
+			break;
+		}
+		parentNode = target.parentNode;
+	}
+
+	if(parentNode.tagName !== 'A'){
+		return;
+	}
+	
+	//include target
+	if(parentNode.target){
+		return;
+	}
+
+	//same origin
+	var href = parentNode.href;
+
+
+	if(!sameOrigin(href)){	
+		return;	
+	}
+
+	var path = parentNode.pathname+parentNode.search+(parentNode.hash||'');
+	var currentPath = this.url;
+
+	e.preventDefault();
+
+	this.leave(currentPath);
+	this.enter(path);
 
 }
 
-var popstateHandler = function(){
+var popstateHandler = function(e){
+	var state = e.state;
+	var path = state.url;
 
+	var currentPath = this.url;
+
+	this.leave(currentPath);
+	this.enter(path);
 }
 
-var hashchangeHandler = function(){
+var hashchangeHandler = function(e){
+	var currentPath = e.oldURL;
+	var path = e.newURL;
 
+
+	this.leave(currentPath);
+	this.enter(path);
 }
 
 
@@ -100,11 +148,11 @@ function Pager(){
 
 
 Pager.prototype.start = function(){
-	document.addEventListener(clickEvent,clickHandler,false);
+	document.addEventListener(clickEvent,clickHandler.bind(this),false);
 
-	document.addEventListener('onpopstate',popstateHandler,false);
+	document.addEventListener('popstate',popstateHandler.bind(this),false);
 
-	document.addEventListener('hashchange',hashchangeHandler,false);
+	document.addEventListener('hashchange',hashchangeHandler.bind(this),false);
 
 }
 
@@ -192,14 +240,14 @@ Pager.prototype.redirect = function(pathfrom,pathto){
 
 
 		if(type === 'enter'){
-			this.ctx.updateState();
 
 			if(isSave){
 				this.ctx.save();
 			}else{
 				this.ctx.replace();
 			}
-			
+
+			this.ctx.updateState();
 		}
 
 		for(var i=0;i<this.routes[type].length;i++){
