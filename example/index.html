@@ -1,0 +1,37 @@
+<html>
+    <head>
+        <title>demo</title>
+        <script src="../index.js" type="text/javascript"></script>
+    </head>
+    <body>
+        <a href="#route1">route1</a>
+        <a href="/route2">route2</a>
+    </body>
+    <script>
+        var pager = new Pager();
+
+        pager.mount('enter','route1',function(){
+
+            alert('route1 - enter')
+
+        })
+
+        pager.mount('leave','route1',function(){
+
+            alert('route1 - leave')
+
+        })
+
+
+        pager.mount('enter','route2',function(){
+
+            alert('route2 - enter')
+
+        })
+        
+        pager.enter('route2')
+
+        // pager.enter('route1')
+    
+    </script>
+</html>

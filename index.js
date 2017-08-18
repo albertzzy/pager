@@ -1,6 +1,5 @@
-// var pathToRegexp = require('path-to-regexp');
 var isHistoryStateSupport = 'onpopstate' in window;
-var location  = window.location;
+// var location  = window.location; //引起刷新页面
 var sessionStorage = window.sessionStorage;
 var clickEvent = document.ontouchstart ? 'touchstart' : 'click';
 
@@ -12,8 +11,8 @@ function sameOrigin(href){
 
 
 var clickHandler = function(e){
-	var target = e.target;
 
+	var target = e.target;
 	//not a
 	var parentNode = target;
 	while(parentNode!==document){
@@ -40,17 +39,21 @@ var clickHandler = function(e){
 		return;	
 	}
 
+
+
 	var path = parentNode.pathname+parentNode.search+(parentNode.hash||'');
-	var currentPath = this.url;
+	var currentPath = this.ctx.url;
+
 
 	e.preventDefault();
-
+	
 	this.leave(currentPath);
 	this.enter(path);
 
 }
 
 var popstateHandler = function(e){
+
 	var state = e.state;
 	var path = state.url;  //
 
@@ -61,6 +64,7 @@ var popstateHandler = function(e){
 }
 
 var hashchangeHandler = function(e){
+
 	var currentPath = e.oldURL; //
 	var path = e.newURL;
 
@@ -138,21 +142,22 @@ PageContext.prototype.replace = function(){
 	
 */
 function Pager(){
-	this.routes = [];
+	this.routes = {};
 
 	this.ctx = new PageContext();
 
 	this.start();
 
+	bindEvents();
 }
 
 
 Pager.prototype.start = function(){
 	document.addEventListener(clickEvent,clickHandler.bind(this),false);
 
-	document.addEventListener('popstate',popstateHandler.bind(this),false);
+	window.addEventListener('popstate',popstateHandler.bind(this),false);
 
-	document.addEventListener('hashchange',hashchangeHandler.bind(this),false);
+	window.addEventListener('hashchange',hashchangeHandler.bind(this),false);
 
 }
 
@@ -172,6 +177,10 @@ Pager.prototype.mount = function(type,path,fn){
 	}else{	
 		if(typeof type === 'string'){
 			if(typeof path === 'string'){
+				if(typeof this.routes[type] == 'undefined'){
+					this.routes[type] = [];
+				}
+
 				this.routes[type].push({
 					url:path,
 					cbs:typeof fn === 'array' ? fn : [fn]
@@ -232,6 +241,8 @@ Pager.prototype.redirect = function(pathfrom,pathto){
 /*	
  enter /leave(path) //save
 */
+function bindEvents(){
+
 ['enter','leave'].forEach(function(type){
 	Pager.prototype[type] = function(path,isSave){
 		if(typeof path !== 'string'){
@@ -274,6 +285,7 @@ Pager.prototype.redirect = function(pathfrom,pathto){
 
 
 
+}
 
 
 
